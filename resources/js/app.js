@@ -17,6 +17,15 @@ window.Vue = require('vue');
 
 import Game from './engine/game';
 
+import Echo from 'laravel-echo';
+
+window.io = require('socket.io-client');
+
+window.Echo = new Echo({
+    broadcaster: 'socket.io',
+    host: 'http://localhost:6001'
+});
+
 const app = new Vue({
     el: '#app',
 
@@ -58,6 +67,10 @@ const app = new Vue({
                 cellSize: 30
             });
 
+            this.game.onClick((x, y, cellX, cellY) => {
+                this.click(cellX, cellY);
+            });
+
             window.addEventListener('keydown', (event) => {
                 switch(event.keyCode) {
                     case 37: return this.game.startMoving('left');
@@ -76,6 +89,8 @@ const app = new Vue({
             this.loadPlayers();
 
             this.loadMap();
+
+            this.echoListener();
         },
 
         loadPlayers() {
@@ -88,6 +103,35 @@ const app = new Vue({
             let data = window.Map;
 
             this.game.init(Decoder.encode(data)).center();
+        },
+
+        click(cellX, cellY) {
+            axios.post(`/api/game/click`, {
+                x: cellX,
+                y: cellY,
+                color: 'green'
+            }).then(() => {
+
+            }).catch(() => {
+
+            });
+        },
+
+        echoListener() {
+            window.Echo.channel('cells_game')
+                .listen('.App\\Events\\Updated', (e) => {
+                    if (_.isEmpty(e.updates)) return;
+
+                    _.each(e.updates, (value, key) => {
+                        this.game.serverInput[
+                            key.split(':')[0]
+                        ][
+                            key.split(':')[1]
+                        ] = value;
+
+                        this.game.render();
+                    });
+                });
         }
     }
 });

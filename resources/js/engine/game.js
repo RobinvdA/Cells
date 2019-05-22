@@ -14,7 +14,10 @@ export default class Game {
             let x = (event.pageX - container.offsetLeft) - this.offsetX;
             let y = (event.pageY - container.offsetTop) - this.offsetY;
 
-            this._onClickCallback(x, y);
+            let cellX = Math.floor(x / this.cellSize);
+            let cellY = Math.floor(y / this.cellSize);
+
+            this._onClickCallback(x, y, cellX, cellY);
         }, false);
 
         this.container.width = this.container.getBoundingClientRect().width;

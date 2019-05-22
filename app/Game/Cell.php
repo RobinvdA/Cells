@@ -10,13 +10,14 @@ class Cell implements \JsonSerializable
     public $color;
 
     /**
+     * @param string $color
      * @return Cell
      */
-    public static function make()
+    public static function make($color = 'white')
     {
         $cell = new static();
 
-        $cell->color = 'white';
+        $cell->color = $color;
 
         return $cell;
     }
