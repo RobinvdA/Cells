@@ -23,7 +23,7 @@ window.io = require('socket.io-client');
 
 window.Echo = new Echo({
     broadcaster: 'socket.io',
-    host: 'http://localhost:6001'
+    host: 'http://192.168.2.41:6001'
 });
 
 const app = new Vue({
@@ -33,7 +33,13 @@ const app = new Vue({
         return {
             game: null,
 
-            running: false
+            loading: false,
+            running: false,
+
+            player: {
+                joined: false,
+                color: null
+            }
         }
     },
 
@@ -86,17 +92,13 @@ const app = new Vue({
                 }
             });
 
-            this.loadPlayers();
-
             this.loadMap();
 
-            this.echoListener();
-        },
+            this.loadActions();
 
-        loadPlayers() {
-            this.game.resources.setPlayers([
-                'red', 'green', 'blue'
-            ]);
+            this.loadPlayer();
+
+            this.initSockets();
         },
 
         loadMap() {
@@ -105,11 +107,39 @@ const app = new Vue({
             this.game.init(Decoder.encode(data)).center();
         },
 
+        loadActions() {
+            axios.get(`/api/game/actions`)
+                .then((response) => {
+                    this.handleUpdates(response.data);
+                })
+                .catch(() => {
+
+                });
+        },
+
+        loadPlayer() {
+            this.loading = true;
+
+            axios.get(`/api/game/join`)
+                .then((response) => {
+                    this.player.joined = true;
+                    this.player.color = response.data.color;
+
+                    this.run();
+
+                    this.loading = false;
+                }).catch(() => {
+
+                });
+        },
+
         click(cellX, cellY) {
+            if (! this.player.joined) return;
+
             axios.post(`/api/game/click`, {
                 x: cellX,
                 y: cellY,
-                color: 'green'
+                color: this.player.color
             }).then(() => {
 
             }).catch(() => {
@@ -117,21 +147,25 @@ const app = new Vue({
             });
         },
 
-        echoListener() {
+        initSockets() {
             window.Echo.channel('cells_game')
                 .listen('.App\\Events\\Updated', (e) => {
-                    if (_.isEmpty(e.updates)) return;
-
-                    _.each(e.updates, (value, key) => {
-                        this.game.serverInput[
-                            key.split(':')[0]
-                        ][
-                            key.split(':')[1]
-                        ] = value;
-
-                        this.game.render();
-                    });
+                    this.handleUpdates(e.updates);
                 });
+        },
+
+        handleUpdates(updates = []) {
+            if (_.isEmpty(updates)) return;
+
+            _.each(updates, (value, key) => {
+                this.game.serverInput[
+                    key.split(':')[1]
+                ][
+                    key.split(':')[0]
+                ] = value;
+
+                this.game.render();
+            });
         }
     }
 });

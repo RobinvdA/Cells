@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Events\Updated;
 use App\Game\Cell;
+use App\Events\Updated;
+use App\Game\Map;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
 
@@ -40,22 +41,45 @@ class Loop extends Command
      */
     public function handle()
     {
+        $this->info('Resetting...');
+
+        Redis::del('actions');
+        Redis::del('players');
+
+        foreach (Map::COLORS as $color) {
+            Redis::del($color . '-click');
+        }
+
         $this->info('Starting loop...');
 
         $iteration = 1;
 
         while (true) {
-            $this->info(time() . ': Iteration ' . $iteration++);
+            $this->info(time() . ': ' . $iteration++);
 
-            $cell = Redis::get('click');
+            $actions = Redis::get('actions');
+            $actions = $actions ? json_decode($actions) : [];
 
-            $cell = $cell ? json_decode($cell) : null;
+            $players = Redis::get('players');
+            $players = $players ? json_decode($players) : [];
 
-            if ($cell) {
+            foreach ($players as $player) {
+                $cell = Redis::get($player . '-click');
+
+                if (! $cell) {
+                    continue;
+                }
+
+                $cell = json_decode($cell);
+
                 $this->handleClick($cell->x, $cell->y, $cell->color);
+
+                $actions[] = $cell;
+
+                Redis::del($player . '-click');
             }
 
-            Redis::del('click');
+            Redis::set('actions', json_encode($actions));
 
             usleep(100000);
         }

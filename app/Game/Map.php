@@ -11,6 +11,8 @@ class Map implements \JsonSerializable
      */
     public $rows;
 
+    const COLORS = ['red', 'green', 'blue', 'yellow'];
+
     /**
      * @return Map
      */

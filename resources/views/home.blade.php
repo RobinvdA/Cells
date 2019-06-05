@@ -13,9 +13,21 @@
     <body>
         <div id="app" class="container mx-auto">
 
-            <button @click="toggleState" type="button" class="border rounded px-3 py-2">
-                @{{ running ? 'Stop' : 'Start' }}
-            </button>
+            <div class="">
+
+                <button @click="toggleState" type="button" class="border rounded px-3 py-2">
+                    @{{ running ? 'Stop' : 'Start' }}
+                </button>
+
+                <span v-if="player.joined" :style="'color:' + player.color">
+                    You are @{{ player.color }}
+                </span>
+
+                <span v-if="loading">
+                    Loading
+                </span>
+
+            </div>
 
             <div class="w-full" style="height:500px">
 
