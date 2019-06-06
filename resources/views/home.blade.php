@@ -9,6 +9,9 @@
         <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet">
 
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="socket-server" content="{{ config('socket.server') }}">
     </head>
     <body>
         <div id="app" class="container mx-auto">

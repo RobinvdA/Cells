@@ -42813,7 +42813,6 @@ module.exports = yeast;
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _engine_decoder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./engine/decoder */ "./resources/js/engine/decoder.js");
 /* harmony import */ var _engine_game__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./engine/game */ "./resources/js/engine/game.js");
-/* harmony import */ var laravel_echo__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! laravel-echo */ "./node_modules/laravel-echo/dist/echo.js");
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -42831,12 +42830,6 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
  */
 
 
-
-window.io = __webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/lib/index.js");
-window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_2__["default"]({
-  broadcaster: 'socket.io',
-  host: 'http://192.168.2.41:6001'
-});
 var app = new Vue({
   el: '#app',
   data: function data() {
@@ -42966,9 +42959,12 @@ var app = new Vue({
 /*!***********************************!*\
   !*** ./resources/js/bootstrap.js ***!
   \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var laravel_echo__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! laravel-echo */ "./node_modules/laravel-echo/dist/echo.js");
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
@@ -42996,14 +42992,20 @@ if (token) {
  * for events that are broadcast by Laravel. Echo and event broadcasting
  * allows your team to easily build robust real-time web applications.
  */
-// import Echo from 'laravel-echo'
-// window.Pusher = require('pusher-js');
-// window.Echo = new Echo({
-//     broadcaster: 'pusher',
-//     key: process.env.MIX_PUSHER_APP_KEY,
-//     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
-//     encrypted: true
-// });
+
+
+
+window.io = __webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/lib/index.js");
+var socketServer = document.head.querySelector('meta[name="socket-server"]');
+
+if (socketServer) {
+  window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
+    broadcaster: 'socket.io',
+    host: socketServer.content
+  });
+} else {
+  console.error('Socket server address not found.');
+}
 
 /***/ }),
 
@@ -43426,8 +43428,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Projects\Web\Github\Cells\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\Projects\Web\Github\Cells\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! c:\MAMP Projects\RobinvdA\Cells\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! c:\MAMP Projects\RobinvdA\Cells\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ }),

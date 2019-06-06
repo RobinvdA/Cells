@@ -17,15 +17,6 @@ window.Vue = require('vue');
 
 import Game from './engine/game';
 
-import Echo from 'laravel-echo';
-
-window.io = require('socket.io-client');
-
-window.Echo = new Echo({
-    broadcaster: 'socket.io',
-    host: 'http://192.168.2.41:6001'
-});
-
 const app = new Vue({
     el: '#app',
 
