@@ -16,7 +16,17 @@
     <body>
         <div id="app" class="container mx-auto">
 
-            <div class="">
+            <div v-if="! initialized">
+                <button @click="initialize" type="button" class="border rounded px-3 py-2">
+                    Connect
+                </button>
+
+                <span v-if="initializing">
+                    Initializing...
+                </span>
+            </div>
+
+            <div v-if="initialized" class="">
 
                 <button @click="toggleState" type="button" class="border rounded px-3 py-2">
                     @{{ running ? 'Stop' : 'Start' }}

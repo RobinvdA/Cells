@@ -24,18 +24,23 @@ const app = new Vue({
         return {
             game: null,
 
+            initializing: false,
+            initialized: false,
+
             loading: false,
             running: false,
 
             player: {
                 joined: false,
                 color: null
-            }
+            },
+
+            socket: null
         }
     },
 
     mounted() {
-        this.initialize();
+
     },
 
     methods: {
@@ -59,7 +64,10 @@ const app = new Vue({
             this.running = false;
         },
 
-        initialize() {
+        async initialize() {
+            this.initializing = true;
+            this.initialized = false;
+
             this.game = new Game(this.$refs.gameContainer, {
                 cellSize: 30
             });
@@ -83,13 +91,16 @@ const app = new Vue({
                 }
             });
 
+            this.initSockets();
+
             this.loadMap();
 
-            this.loadActions();
+            await this.loadActions();
 
-            this.loadPlayer();
+            await this.loadPlayer();
 
-            this.initSockets();
+            this.initialized = true;
+            this.initializing = false;
         },
 
         loadMap() {
@@ -98,30 +109,34 @@ const app = new Vue({
             this.game.init(Decoder.encode(data)).center();
         },
 
-        loadActions() {
-            axios.get(`/api/game/actions`)
-                .then((response) => {
-                    this.handleUpdates(response.data);
-                })
-                .catch(() => {
+        async loadActions() {
+            let response = await axios.get(`/api/game/actions`);
 
-                });
+            this.handleUpdates(response.data);
+
+            return response;
         },
 
-        loadPlayer() {
-            this.loading = true;
+        async loadPlayer() {
+            this.socket.emit('join');
 
-            axios.get(`/api/game/join`)
-                .then((response) => {
-                    this.player.joined = true;
-                    this.player.color = response.data.color;
+            this.socket.on('player', (color) => {
+                this.player.joined = true;
+                this.player.color = color;
+            });
 
-                    this.run();
-
-                    this.loading = false;
-                }).catch(() => {
-
-                });
+            // this.loading = true;
+            //
+            // let response = await axios.get(`/api/game/join`);
+            //
+            // this.player.joined = true;
+            // this.player.color = response.data.color;
+            //
+            // this.run();
+            //
+            // this.loading = false;
+            //
+            // return response;
         },
 
         click(cellX, cellY) {
@@ -139,10 +154,12 @@ const app = new Vue({
         },
 
         initSockets() {
-            window.Echo.channel('cells_game')
-                .listen('.App\\Events\\Updated', (e) => {
-                    this.handleUpdates(e.updates);
-                });
+            this.socket = new IO(SocketServer);
+
+            // window.Echo.channel('cells_game')
+            //     .listen('.App\\Events\\Updated', (e) => {
+            //         this.handleUpdates(e.updates);
+            //     });
         },
 
         handleUpdates(updates = []) {

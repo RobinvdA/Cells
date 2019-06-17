@@ -30,17 +30,14 @@ if (token) {
  * allows your team to easily build robust real-time web applications.
  */
 
-import Echo from 'laravel-echo';
-
-window.io = require('socket.io-client');
+window.IO = require('socket.io-client');
 
 let socketServer = document.head.querySelector('meta[name="socket-server"]');
 
-if (socketServer) {
-    window.Echo = new Echo({
-        broadcaster: 'socket.io',
-        host: socketServer.content
-    });
-} else {
+window.SocketServer = socketServer ? socketServer.content : null;
+
+window.Socket = null;
+
+if (! SocketServer) {
     console.error('Socket server address not found.');
 }
