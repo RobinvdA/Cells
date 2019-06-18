@@ -1,7 +1,6 @@
 import Loop from './loop';
 import Renderer from './renderer';
 import Resources from './resources';
-import Decoder from './decoder';
 
 export default class Game {
 
@@ -32,7 +31,7 @@ export default class Game {
 
         this.resources = new Resources();
 
-        this.serverInput = [];
+        this.grid = [];
 
         this.cellSize = options.cellSize || 20;
         this.gridHeight = 0;
@@ -45,11 +44,11 @@ export default class Game {
         this._movingToY = 0;
     }
 
-    init(serverInput) {
-        this.serverInput = Decoder.decode(serverInput);
+    init(grid) {
+        this.grid = grid;
 
-        this.gridHeight = this.serverInput.length * this.cellSize;
-        this.gridWidth = this.serverInput[0].length * this.cellSize;
+        this.gridHeight = this.grid.length * this.cellSize;
+        this.gridWidth = this.grid.rows[0].length * this.cellSize;
 
         return this;
     }

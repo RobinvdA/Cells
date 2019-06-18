@@ -30,8 +30,9 @@ const app = new Vue({
             loading: false,
             running: false,
 
+            joined: false,
+
             player: {
-                joined: false,
                 color: null
             },
 
@@ -93,20 +94,12 @@ const app = new Vue({
 
             this.initSockets();
 
-            this.loadMap();
-
             await this.loadActions();
 
             await this.loadPlayer();
 
             this.initialized = true;
             this.initializing = false;
-        },
-
-        loadMap() {
-            let data = window.Map;
-
-            this.game.init(Decoder.encode(data)).center();
         },
 
         async loadActions() {
@@ -120,27 +113,23 @@ const app = new Vue({
         async loadPlayer() {
             this.socket.emit('join');
 
-            this.socket.on('player', (color) => {
-                this.player.joined = true;
-                this.player.color = color;
+            this.socket.on('player', (player) => {
+                this.player = player;
+                this.joined = true;
             });
 
-            // this.loading = true;
-            //
-            // let response = await axios.get(`/api/game/join`);
-            //
-            // this.player.joined = true;
-            // this.player.color = response.data.color;
-            //
-            // this.run();
-            //
-            // this.loading = false;
-            //
-            // return response;
+            this.socket.on('game-full', () => {
+                this.joined = false;
+            });
+
+            this.socket.on('grid', (grid) => {
+                console.log(grid);
+                this.game.init(grid).center();
+            });
         },
 
         click(cellX, cellY) {
-            if (! this.player.joined) return;
+            if (! this.joined) return;
 
             axios.post(`/api/game/click`, {
                 x: cellX,
@@ -155,11 +144,6 @@ const app = new Vue({
 
         initSockets() {
             this.socket = new IO(SocketServer);
-
-            // window.Echo.channel('cells_game')
-            //     .listen('.App\\Events\\Updated', (e) => {
-            //         this.handleUpdates(e.updates);
-            //     });
         },
 
         handleUpdates(updates = []) {

@@ -42336,8 +42336,8 @@ var app = new Vue({
       initialized: false,
       loading: false,
       running: false,
+      joined: false,
       player: {
-        joined: false,
         color: null
       },
       socket: null
@@ -42402,19 +42402,18 @@ var app = new Vue({
                   }
                 });
                 this.initSockets();
-                this.loadMap();
-                _context.next = 10;
+                _context.next = 9;
                 return this.loadActions();
 
-              case 10:
-                _context.next = 12;
+              case 9:
+                _context.next = 11;
                 return this.loadPlayer();
 
-              case 12:
+              case 11:
                 this.initialized = true;
                 this.initializing = false;
 
-              case 14:
+              case 13:
               case "end":
                 return _context.stop();
             }
@@ -42428,10 +42427,6 @@ var app = new Vue({
 
       return initialize;
     }(),
-    loadMap: function loadMap() {
-      var data = window.Map;
-      this.game.init(_engine_decoder__WEBPACK_IMPORTED_MODULE_1__["default"].encode(data)).center();
-    },
     loadActions: function () {
       var _loadActions = _asyncToGenerator(
       /*#__PURE__*/
@@ -42474,23 +42469,20 @@ var app = new Vue({
             switch (_context3.prev = _context3.next) {
               case 0:
                 this.socket.emit('join');
-                this.socket.on('player', function (color) {
-                  _this2.player.joined = true;
-                  _this2.player.color = color;
-                }); // this.loading = true;
-                //
-                // let response = await axios.get(`/api/game/join`);
-                //
-                // this.player.joined = true;
-                // this.player.color = response.data.color;
-                //
-                // this.run();
-                //
-                // this.loading = false;
-                //
-                // return response;
+                this.socket.on('player', function (player) {
+                  _this2.player = player;
+                  _this2.joined = true;
+                });
+                this.socket.on('game-full', function () {
+                  _this2.joined = false;
+                });
+                this.socket.on('grid', function (grid) {
+                  console.log(grid);
 
-              case 2:
+                  _this2.game.init(grid).center();
+                });
+
+              case 4:
               case "end":
                 return _context3.stop();
             }
@@ -42505,7 +42497,7 @@ var app = new Vue({
       return loadPlayer;
     }(),
     click: function click(cellX, cellY) {
-      if (!this.player.joined) return;
+      if (!this.joined) return;
       axios.post("/api/game/click", {
         x: cellX,
         y: cellY,
@@ -42513,10 +42505,7 @@ var app = new Vue({
       }).then(function () {})["catch"](function () {});
     },
     initSockets: function initSockets() {
-      this.socket = new IO(SocketServer); // window.Echo.channel('cells_game')
-      //     .listen('.App\\Events\\Updated', (e) => {
-      //         this.handleUpdates(e.updates);
-      //     });
+      this.socket = new IO(SocketServer);
     },
     handleUpdates: function handleUpdates() {
       var _this3 = this;
@@ -42647,13 +42636,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _loop__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loop */ "./resources/js/engine/loop.js");
 /* harmony import */ var _renderer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./renderer */ "./resources/js/engine/renderer.js");
 /* harmony import */ var _resources__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./resources */ "./resources/js/engine/resources.js");
-/* harmony import */ var _decoder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./decoder */ "./resources/js/engine/decoder.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 
 
 
@@ -42688,7 +42675,7 @@ function () {
     this.loop = new _loop__WEBPACK_IMPORTED_MODULE_0__["default"]();
     this.loop.onDraw(this.update.bind(this));
     this.resources = new _resources__WEBPACK_IMPORTED_MODULE_2__["default"]();
-    this.serverInput = [];
+    this.grid = [];
     this.cellSize = options.cellSize || 20;
     this.gridHeight = 0;
     this.gridHeight = 0;
@@ -42700,10 +42687,10 @@ function () {
 
   _createClass(Game, [{
     key: "init",
-    value: function init(serverInput) {
-      this.serverInput = _decoder__WEBPACK_IMPORTED_MODULE_3__["default"].decode(serverInput);
-      this.gridHeight = this.serverInput.length * this.cellSize;
-      this.gridWidth = this.serverInput[0].length * this.cellSize;
+    value: function init(grid) {
+      this.grid = grid;
+      this.gridHeight = this.grid.length * this.cellSize;
+      this.gridWidth = this.grid.rows[0].length * this.cellSize;
       return this;
     }
   }, {
@@ -42907,13 +42894,13 @@ function () {
     value: function renderMap() {
       this.map.context.clearRect(0, 0, this.map.container.width, this.map.container.height);
 
-      for (var y = 0, rowCount = this.game.serverInput.length; y < rowCount; y++) {
-        var row = this.game.serverInput[y];
+      for (var y = 0, rowCount = this.game.grid.rows.length; y < rowCount; y++) {
+        var row = this.game.grid.rows[y];
 
-        for (var x = 0, cellCount = row.length; x < cellCount; x++) {
-          var color = row[x];
+        for (var x = 0, cellCount = row.cells.length; x < cellCount; x++) {
+          var cell = row.cells[x];
           this.map.context.beginPath();
-          this.map.context.fillStyle = color;
+          this.map.context.fillStyle = cell.color;
           this.map.context.strokeStyle = '#333';
           this.map.context.rect(x * this.game.cellSize, y * this.game.cellSize, this.game.cellSize, this.game.cellSize);
           this.map.context.fill();
@@ -43001,8 +42988,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! c:\MAMP Projects\RobinvdA\Cells\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! c:\MAMP Projects\RobinvdA\Cells\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\Projects\Web\Github\Cells\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\Projects\Web\Github\Cells\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ }),

@@ -26,13 +26,13 @@
                 </span>
             </div>
 
-            <div v-if="initialized" class="">
+            <div v-if="joined">
 
                 <button @click="toggleState" type="button" class="border rounded px-3 py-2">
                     @{{ running ? 'Stop' : 'Start' }}
                 </button>
 
-                <span v-if="player.joined" :style="'color:' + player.color">
+                <span :style="'color:' + player.color">
                     You are @{{ player.color }}
                 </span>
 

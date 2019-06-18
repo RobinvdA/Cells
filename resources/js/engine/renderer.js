@@ -9,17 +9,17 @@ export default class Renderer {
     renderMap() {
         this.map.context.clearRect(0, 0, this.map.container.width, this.map.container.height);
 
-        for (let y = 0, rowCount = this.game.serverInput.length; y < rowCount; y++) {
+        for (let y = 0, rowCount = this.game.grid.rows.length; y < rowCount; y++) {
 
-            let row = this.game.serverInput[y];
+            let row = this.game.grid.rows[y];
 
-            for (let x = 0, cellCount = row.length; x < cellCount; x++) {
+            for (let x = 0, cellCount = row.cells.length; x < cellCount; x++) {
 
-                let color = row[x];
+                let cell = row.cells[x];
 
                 this.map.context.beginPath();
 
-                this.map.context.fillStyle = color;
+                this.map.context.fillStyle = cell.color;
                 this.map.context.strokeStyle = '#333';
 
                 this.map.context.rect(
