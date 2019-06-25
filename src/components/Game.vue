@@ -1,7 +1,7 @@
 <template>
 
-    <v-layout column>
-        <v-flex>
+    <v-layout column align-center>
+        <v-flex my-3>
             <v-btn @click="join" color="primary">
                 Join
             </v-btn>
@@ -9,13 +9,13 @@
 
         <v-flex>
 
-            <div style="width:500px; height: 400px;">
+            <v-card width="500px" height="400px">
 
-                <canvas ref="gameContainer" style="width:100%;height:100%;border:1px solid #333">
+                <canvas ref="gameContainer" style="width:100%;height:100%">
 
                 </canvas>
 
-            </div>
+            </v-card>
 
         </v-flex>
     </v-layout>
