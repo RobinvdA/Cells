@@ -4,10 +4,10 @@
         <v-flex>
             <v-card>
                 <v-card-title class="headline">
-                    RobinvdA's game
+                    {{ game.name }}
                 </v-card-title>
 
-                <v-data-table :items="players" hide-headers hide-actions>
+                <v-data-table :items="game.players" hide-headers hide-actions>
                     <template v-slot:items="props">
                         <td :class="props.item.color"></td>
                         <td class="px-3">
@@ -48,6 +48,10 @@
 
             game: {
                 default: null
+            },
+
+            user: {
+                default: null
             }
         },
 
@@ -55,18 +59,16 @@
             return {
                 engine: null,
 
-                players: [],
-
                 running: false
             }
         },
 
         mounted() {
-
+            this.init();
         },
 
         methods: {
-            join() {
+            init() {
                 this.engine = new Game(this.$refs.gameContainer, {
                     cellSize: 30
                 });
@@ -90,7 +92,7 @@
                     }
                 });
 
-                this.loadPlayer();
+                this.initSocketListeners();
             },
 
             run() {
@@ -105,9 +107,7 @@
                 this.engine.stop();
             },
 
-            loadPlayer() {
-                this.socket.emit('join');
-
+            initSocketListeners() {
                 this.socket.on('grid', (grid) => {
                     this.engine.init(grid).center();
                 });
@@ -120,6 +120,10 @@
 
                 this.socket.on('game-state', (grid) => {
                     this.engine.init(grid);
+                });
+
+                this.socket.on('game-players', (players) => {
+                    this.game.players = players;
                 });
             }
         },

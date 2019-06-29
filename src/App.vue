@@ -19,13 +19,14 @@
 
         <v-content>
 
-            <v-container v-if="! name" grid-list-lg>
+            <v-container v-if="! user.name" grid-list-lg>
                 <v-layout>
                     <v-flex>
                         <v-card>
                             <v-card-text>
                                 <v-text-field
                                         v-model="typedName"
+                                        @keyup.enter="saveName"
                                         @click:append-outer="saveName"
                                         :loading="savingName"
                                         label="Nickname"
@@ -38,9 +39,9 @@
                 </v-layout>
             </v-container>
 
-            <lobby v-else-if="! game" :socket="socket"></lobby>
+            <lobby v-else-if="! game" :socket="socket" :user="user"></lobby>
 
-            <game v-else :game="game"></game>
+            <game v-else :socket="socket" :game="game" :user="user"></game>
 
         </v-content>
     </v-app>
@@ -63,7 +64,10 @@
                 game: null,
 
                 typedName: null,
-                name: null,
+
+                user: {
+                    name: null
+                },
 
                 savingName: false
             }
@@ -84,7 +88,7 @@
 
             initSocketListeners() {
                 this.socket.on('name-saved', (name) => {
-                    this.name = name;
+                    this.user.name = name;
 
                     this.savingName = false;
                 });

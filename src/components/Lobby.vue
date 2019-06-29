@@ -31,7 +31,7 @@
                                     {{ game.name }}
                                 </v-list-tile-title>
                                 <v-list-tile-sub-title>
-                                    {{ game.players }} / {{ game.slots }} - {{ game.state }}
+                                    {{ game.players.length }} / {{ game.slots }} - {{ game.state }}
                                 </v-list-tile-sub-title>
                             </v-list-tile-content>
 
@@ -64,25 +64,18 @@
         props: {
             socket: {
                 default: null
+            },
+
+            user: {
+                default: null
             }
         },
 
         data() {
             return {
-                players: [
-                    { name: 'RobinvdA' },
-                    { name: 'Anonymous' },
-                    { name: 'Unkown' }
-                ],
+                players: [],
 
-                games: [
-                    {
-                        name: 'RobinvdA\'s game',
-                        players: 0,
-                        slots: 4,
-                        state: 'Not yet started'
-                    }
-                ],
+                games: [],
 
                 joining: false,
                 creating: false,
@@ -94,21 +87,21 @@
         mounted() {
             this.initSocketListeners();
 
-            this.socket.emit('joined-lobby');
+            this.socket.emit('join-lobby');
         },
 
         methods: {
             join(game) {
                 this.joining = true;
 
-                this.socket.emit('joined-game', game);
+                this.socket.emit('join-game', game);
             },
 
             create() {
                 this.creating = true;
 
-                this.socket.emit('create', {
-                    name: ''
+                this.socket.emit('create-game', {
+                    name: this.user.name + '\'s game'
                 });
             },
 
@@ -119,6 +112,10 @@
                     this.games = state.games;
                 });
             }
+        },
+
+        beforeDestroy() {
+            this.socket.removeListener('lobby-state');
         }
 
     }
