@@ -1,39 +1,41 @@
 <template>
 
-    <v-layout row>
-        <v-flex>
-            <v-card>
-                <v-card-title class="headline">
-                    {{ game.name }}
-                </v-card-title>
+    <v-container grid-list-lg>
+        <v-layout row wrap>
+            <v-flex xs12 md4>
+                <v-card>
+                    <v-card-title class="headline">
+                        {{ game.name }}
+                    </v-card-title>
 
-                <v-data-table :items="game.players" hide-headers hide-actions>
-                    <template v-slot:items="props">
-                        <td :class="props.item.color"></td>
-                        <td class="px-3">
-                            {{ props.item.name }}
-                        </td>
-                    </template>
-                </v-data-table>
-            </v-card>
-        </v-flex>
+                    <v-data-table :items="game.players" hide-headers hide-actions>
+                        <template v-slot:items="props">
+                            <td :class="props.item.color"></td>
+                            <td class="px-3">
+                                {{ props.item.name }}
+                            </td>
+                        </template>
+                    </v-data-table>
+                </v-card>
+            </v-flex>
 
-        <v-flex shrink>
+            <v-flex shrink>
 
-            <v-card width="500px">
+                <v-card width="500px">
 
-                <v-card-title class="title">
-                    Please wait...
-                </v-card-title>
+                    <v-card-title class="title">
+                        {{ state }}
+                    </v-card-title>
 
-                <canvas ref="gameContainer" style="width:100%;height:400px">
+                    <canvas ref="gameContainer" style="width:100%;height:400px">
 
-                </canvas>
+                    </canvas>
 
-            </v-card>
+                </v-card>
 
-        </v-flex>
-    </v-layout>
+            </v-flex>
+        </v-layout>
+    </v-container>
 
 </template>
 
@@ -59,7 +61,9 @@
             return {
                 engine: null,
 
-                running: false
+                running: false,
+
+                state: ''
             }
         },
 
@@ -118,8 +122,10 @@
                     this.run();
                 });
 
-                this.socket.on('game-state', (grid) => {
-                    this.engine.init(grid);
+                this.socket.on('game-state', (game) => {
+                    this.state = game.state;
+
+                    this.engine.init(game.grid);
                 });
 
                 this.socket.on('game-players', (players) => {
