@@ -1,109 +1,54 @@
 <template>
-    <v-app>
-        <v-toolbar app>
-            <v-toolbar-title class="headline text-uppercase">
-                <span>
-                    Cells
-                </span>
-                <span class="font-weight-light">
 
-                </span>
-            </v-toolbar-title>
+    <component :is="layout">
 
-            <v-spacer></v-spacer>
+        <router-view :socket="socket" :user="user"></router-view>
 
-            <v-btn flat href="https://github.com/robinvda/cells" target="_blank">
-                Git
-            </v-btn>
-        </v-toolbar>
+    </component>
 
-        <v-content>
-
-            <v-container v-if="! user.name" grid-list-lg>
-                <v-layout>
-                    <v-flex>
-                        <v-card>
-                            <v-card-text>
-                                <v-text-field
-                                        v-model="typedName"
-                                        @keyup.enter="saveName"
-                                        @click:append-outer="saveName"
-                                        :loading="savingName"
-                                        label="Nickname"
-                                        type="text"
-                                        append-outer-icon="save"
-                                ></v-text-field>
-                            </v-card-text>
-                        </v-card>
-                    </v-flex>
-                </v-layout>
-            </v-container>
-
-            <lobby v-else-if="! game" :socket="socket" :user="user"></lobby>
-
-            <game v-else :socket="socket" :game="game" :user="user"></game>
-
-        </v-content>
-    </v-app>
 </template>
 
 <script>
-    import Lobby from './components/Lobby';
-    import Game from './components/Game';
-
     export default {
         components: {
-            Lobby,
-            Game
+
+        },
+
+        computed: {
+            layout() {
+                return (this.$route.meta.layout || this.defaultLayout) + '-layout';
+            }
         },
 
         data() {
             return {
+                defaultLayout: 'default',
+
+                server: 'http://localhost:3000',
+
                 socket: null,
 
-                game: null,
-
-                typedName: null,
-
-                user: {
-                    name: null
-                },
-
-                savingName: false
+                user: null
             }
         },
 
         mounted() {
             this.initSocket();
-
-            this.initSocketListeners();
         },
 
         methods: {
-            saveName() {
-                this.savingName = true;
+            initSocket() {
+                this.socket = new IO(this.server);
 
-                this.socket.emit('save-name', this.typedName);
+                this.initSocketListeners();
             },
 
             initSocketListeners() {
-                this.socket.on('name-saved', (name) => {
-                    this.user.name = name;
+                this.socket.on('registered', (user) => {
+                    this.user = user;
 
-                    this.savingName = false;
+                    this.$router.push('lobby');
                 });
-
-                this.socket.on('joined-game', (game) => {
-                    this.game = game;
-                });
-
-                this.socket.on('left-game', () => {
-                    this.game = null;
-                });
-            },
-
-            initSocket() {
-                this.socket = new IO(`http://localhost:3000`);
             }
         }
     }
