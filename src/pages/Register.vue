@@ -1,13 +1,14 @@
 <template>
 
-    <v-container>
-        <v-layout>
-            <v-flex>
+    <v-container fluid>
+        <v-layout justify-center>
+            <v-flex xs12 md6>
                 <v-card>
                     <v-card-text v-if="socket">
                         <v-text-field
                             v-model="name"
                             @click:append-outer="save"
+                            @keyup.enter="save"
                             :loading="saving"
                             label="Nickname"
                             type="text"

@@ -1,8 +1,8 @@
 <template>
 
-    <v-container v-if="game" grid-list-lg>
-        <v-layout row wrap>
-            <v-flex xs12 md4>
+    <v-container v-if="game" fluid grid-list-xl>
+        <v-layout row wrap justify-center>
+            <v-flex xs12 sm6>
                 <v-card>
                     <v-card-title class="headline">
                         {{ game.name }}
@@ -10,7 +10,7 @@
 
                     <v-data-table :items="game.players" hide-headers hide-actions>
                         <template v-slot:items="props">
-                            <td class="px-3">
+                            <td style="width:160px" class="px-3">
                                 <v-chip :color="props.item.color.code" label outline>
                                     {{ props.item.color.name }}
                                 </v-chip>
@@ -20,6 +20,22 @@
                             </td>
                         </template>
                     </v-data-table>
+
+                    <v-card-actions>
+                        <v-spacer />
+
+                        <v-btn @click="leave" color="red" flat>
+                            Leave
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-flex>
+
+            <v-flex xs12 sm6>
+                <v-card>
+                    <v-card-title class="headline">
+
+                    </v-card-title>
                 </v-card>
             </v-flex>
 
@@ -79,6 +95,10 @@
         },
 
         methods: {
+            leave() {
+                this.socket.emit('leave-game-request', this.game.id);
+            },
+
             initSocketListeners() {
                 this.socket.on('join-game-failed', () => {
                     this.$router.go(-1);
@@ -86,6 +106,10 @@
 
                 this.socket.on('joined-game', (game) => {
                     this.game = game;
+                });
+
+                this.socket.on('left-game', (game) => {
+                    this.$router.replace({ name: 'lobby' });
                 });
             }
         }
