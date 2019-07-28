@@ -71,7 +71,7 @@
                     this.removeUser(user.id);
                 });
 
-                this.socket.on('game-created', (game) => {
+                this.socket.on('created-game', (game) => {
                     this.addGame(game);
 
                     if (game.user.id == this.user.id) {

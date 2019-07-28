@@ -27,7 +27,7 @@
         <v-card-actions>
             <v-spacer></v-spacer>
 
-            <v-btn @click="create" :loading="creating" color="primary" flat>
+            <v-btn @click="create" :loading="creating" color="primary" outline>
                 New game
             </v-btn>
         </v-card-actions>

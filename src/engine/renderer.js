@@ -9,13 +9,13 @@ export default class Renderer {
     renderMap() {
         this.map.context.clearRect(0, 0, this.map.container.width, this.map.container.height);
 
-        for (let y = 0, rowCount = this.game.grid.rows.length; y < rowCount; y++) {
+        for (let x = 0, rowCount = this.game.columns.length; x < rowCount; x++) {
 
-            let row = this.game.grid.rows[y];
+            let column = this.game.columns[x];
 
-            for (let x = 0, cellCount = row.cells.length; x < cellCount; x++) {
+            for (let y = 0, cellCount = column.cells.length; y < cellCount; y++) {
 
-                let cell = row.cells[x];
+                let cell = column.cells[y];
 
                 this.map.context.beginPath();
 

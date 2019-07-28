@@ -1,6 +1,5 @@
 import Loop from './loop';
 import Renderer from './renderer';
-import Resources from './resources';
 
 export default class Game {
 
@@ -12,7 +11,7 @@ export default class Game {
         this.container.addEventListener('click', (event) => {
             let x = (event.pageX - container.offsetLeft) - this.offsetX;
             let y = (event.pageY - container.offsetTop) - this.offsetY;
-
+console.log(event.pageX, container.offsetLeft);
             let cellX = Math.floor(x / this.cellSize);
             let cellY = Math.floor(y / this.cellSize);
 
@@ -29,9 +28,7 @@ export default class Game {
         this.loop = new Loop();
         this.loop.onDraw(this.update.bind(this));
 
-        this.resources = new Resources();
-
-        this.grid = [];
+        this.columns = [];
 
         this.cellSize = options.cellSize || 20;
         this.gridHeight = 0;
@@ -44,11 +41,11 @@ export default class Game {
         this._movingToY = 0;
     }
 
-    init(grid) {
-        this.grid = grid;
+    init(columns) {
+        this.columns = columns;
 
-        this.gridHeight = this.grid.rows.length * this.cellSize;
-        this.gridWidth = this.grid.rows[0].cells.length * this.cellSize;
+        this.gridHeight = this.columns.length * this.cellSize;
+        this.gridWidth = this.columns[0].cells.length * this.cellSize;
 
         return this;
     }

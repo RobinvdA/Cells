@@ -10,22 +10,26 @@
 
                     <v-data-table :items="game.players" hide-headers hide-actions>
                         <template v-slot:items="props">
-                            <td style="width:160px" class="px-3">
-                                <v-chip :color="props.item.color.code" label outline>
-                                    {{ props.item.color.name }}
+                            <td style="width:40px" class="px-3">
+                                <v-chip :color="props.item.color.code" label>
+
                                 </v-chip>
                             </td>
-                            <td class="px-3">
+                            <td class="body-2 px-3">
                                 {{ props.item.name }}
                             </td>
                         </template>
                     </v-data-table>
 
                     <v-card-actions>
-                        <v-spacer />
-
                         <v-btn @click="leave" color="red" flat>
                             Leave
+                        </v-btn>
+
+                        <v-spacer />
+
+                        <v-btn v-if="game.user.id == user.id" @click="start" color="primary" outline>
+                            Start game
                         </v-btn>
                     </v-card-actions>
                 </v-card>
@@ -41,17 +45,7 @@
 
             <v-flex shrink>
 
-                <v-card width="500px">
-
-                    <v-card-title class="title">
-
-                    </v-card-title>
-
-                    <canvas ref="gameContainer" style="width:100%;height:400px">
-
-                    </canvas>
-
-                </v-card>
+                <engine :countdown="countdown" :state="state"></engine>
 
             </v-flex>
         </v-layout>
@@ -60,7 +54,11 @@
 </template>
 
 <script>
+    import Engine from './../components/Game/Engine';
+
     export default {
+        components: { Engine },
+
         props: {
             socket: {
                 default: null
@@ -86,7 +84,11 @@
 
         data() {
             return {
-                game: null
+                game: null,
+
+                countdown: null,
+
+                state: null
             }
         },
 
@@ -95,11 +97,25 @@
         },
 
         methods: {
+            start() {
+                this.socket.emit('start-game-request', this.game.id);
+            },
+
             leave() {
                 this.socket.emit('leave-game-request', this.game.id);
             },
 
             initSocketListeners() {
+                this.socket.on('game-state', (state) => {
+                    this.countdown = null;
+
+                    this.state = state;
+                });
+
+                this.socket.on('game-countdown', (count) => {
+                    this.countdown = count;
+                });
+
                 this.socket.on('join-game-failed', () => {
                     this.$router.go(-1);
                 });
