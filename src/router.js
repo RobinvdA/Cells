@@ -15,6 +15,7 @@ Vue.component('default-layout', DefaultLayout);
 import Register from './pages/Register';
 import Lobby from './pages/Lobby';
 import Game from './pages/Game';
+import Test from './pages/Test';
 
 const router = new Router({
   mode: 'history',
@@ -37,6 +38,13 @@ const router = new Router({
           name: 'game',
           component: Game,
           meta: { layout: 'default', auth: true }
+      },
+
+      {
+          path: '/test',
+          name: 'test',
+          component: Test,
+          meta: { layout: 'default', auth: false }
       }
   ]
 });

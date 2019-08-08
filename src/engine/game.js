@@ -11,7 +11,7 @@ export default class Game {
         this.container.addEventListener('click', (event) => {
             let x = (event.pageX - container.offsetLeft) - this.offsetX;
             let y = (event.pageY - container.offsetTop) - this.offsetY;
-console.log(event.pageX, container.offsetLeft);
+
             let cellX = Math.floor(x / this.cellSize);
             let cellY = Math.floor(y / this.cellSize);
 
@@ -30,6 +30,12 @@ console.log(event.pageX, container.offsetLeft);
 
         this.columns = [];
 
+        this._resources = {
+            sprites: [],
+            spritesLoaded: 0
+            //
+        };
+
         this.cellSize = options.cellSize || 20;
         this.gridHeight = 0;
         this.gridHeight = 0;
@@ -41,11 +47,33 @@ console.log(event.pageX, container.offsetLeft);
         this._movingToY = 0;
     }
 
+    resources(resources) {
+        this._resources = _.merge(this._resources, resources);
+
+        this._resources.sprites = _.map(this._resources.sprites, (base64) => {
+            let image = new Image();
+
+            image.onload = () => {
+                this._resources.spritesLoaded++;
+
+                if (this._resources.spritesLoaded == this._resources.sprites.length) {
+                    console.log('Loaded!');
+                }
+            }
+
+            image.src = base64;
+
+            return image;
+        });
+
+        return this;
+    }
+
     init(columns) {
         this.columns = columns;
 
         this.gridHeight = this.columns.length * this.cellSize;
-        this.gridWidth = this.columns[0].cells.length * this.cellSize;
+        this.gridWidth = this.columns[0].length * this.cellSize;
 
         return this;
     }

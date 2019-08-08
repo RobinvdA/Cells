@@ -1,18 +1,8 @@
 <template>
 
-    <v-card width="400px">
+    <canvas ref="gameContainer" style="width:100%;height:400px">
 
-        <v-card-title v-if="countdown">
-            <h2 class="title text-xs-center">
-                {{ countdown }}
-            </h2>
-        </v-card-title>
-
-        <canvas ref="gameContainer" style="width:100%;height:400px">
-
-        </canvas>
-
-    </v-card>
+    </canvas>
 
 </template>
 
@@ -41,17 +31,24 @@
         watch: {
             state: {
                 handler(state, oldState) {
-                    if (state) {
-                        this.engine.init(state.columns);
-
-                        if (! oldState) {
-                            this.engine.center();
-
-                            this.engine.run();
+                    this.$nextTick(() => {
+                        if (! this.engine) {
+                            this.init();
                         }
-                    }
+
+                        if (state) {
+                            this.engine.resources(this.resources).init(state);
+
+                            if (!oldState) {
+                                this.engine.center();
+
+                                this.engine.run();
+                            }
+                        }
+                    });
                 },
-                deep: true
+                deep: true,
+                immediate: true
             }
         },
 
@@ -59,11 +56,16 @@
             return {
                 engine: null,
 
+                resources: {
+                    sprites: []
+                }
             }
         },
 
         mounted() {
-            this.init();
+            window.spriteContext.keys().forEach((filename)=>{
+                this.resources.sprites.push(window.spriteContext(filename));
+            });
         },
 
         methods: {
@@ -76,7 +78,7 @@
                     console.log('Click', cellX, cellY);
                 });
 
-                // this.initKeyListeners();
+                this.initKeyListeners();
             },
 
             initKeyListeners() {

@@ -33,7 +33,7 @@
         },
 
         mounted() {
-            this.initSocket();
+            // this.initSocket();
         },
 
         methods: {

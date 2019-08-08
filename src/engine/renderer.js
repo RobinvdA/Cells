@@ -13,26 +13,15 @@ export default class Renderer {
 
             let column = this.game.columns[x];
 
-            for (let y = 0, cellCount = column.cells.length; y < cellCount; y++) {
+            for (let y = 0, cellCount = column.length; y < cellCount; y++) {
 
-                let cell = column.cells[y];
+                let cell = column[y];
 
-                this.map.context.beginPath();
-
-                this.map.context.fillStyle = cell.color;
-                this.map.context.strokeStyle = '#333';
-
-                this.map.context.rect(
-                    x * this.game.cellSize,
+                this.map.context.drawImage(
+                    this.game._resources.sprites[cell],
                     y * this.game.cellSize,
-                    this.game.cellSize,
-                    this.game.cellSize
+                    x * this.game.cellSize
                 );
-
-                this.map.context.fill();
-                this.map.context.stroke();
-
-                this.map.context.closePath();
 
             }
 

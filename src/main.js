@@ -8,6 +8,8 @@ window._ = require('lodash');
 
 Vue.config.productionTip = false
 
+window.spriteContext = require.context('./assets/resources/sprites', true, /\.(png)$/);
+
 new Vue({
   router,
   render: h => h(App)
