@@ -4,7 +4,7 @@ export default class Loop {
         this.fps = 60;
 
         this.now = null;
-        this.then = Date.now();
+        this.then = performance.now();
         this.diff = null;
 
         this.interval = 1000 / this.fps;
@@ -33,7 +33,7 @@ export default class Loop {
 
         requestAnimationFrame(this.loop.bind(this));
 
-        this.now = Date.now();
+        this.now = performance.now();
         this.diff = this.now - this.then;
 
         if (this.diff > this.interval) {

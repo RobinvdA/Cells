@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import './plugins/vuetify';
+import Vuetify from './plugins/vuetify';
 import App from './App.vue';
 import router from './router';
 
@@ -11,6 +11,7 @@ Vue.config.productionTip = false
 window.spriteContext = require.context('./assets/resources/sprites', true, /\.(png)$/);
 
 new Vue({
-  router,
-  render: h => h(App)
+    router,
+    vuetify: Vuetify,
+    render: h => h(App)
 }).$mount('#app')

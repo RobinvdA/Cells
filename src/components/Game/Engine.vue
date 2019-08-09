@@ -1,6 +1,6 @@
 <template>
 
-    <canvas ref="gameContainer" style="width:100%;height:400px">
+    <canvas ref="gameContainer" style="width:100%">
 
     </canvas>
 
@@ -8,6 +8,7 @@
 
 <script>
     import Game from './../../engine/game';
+    import Sprite from './../../engine/resources/sprite';
 
     export default {
         props: {
@@ -23,28 +24,20 @@
                 default: null
             },
 
-            state: {
-                default: null
+            layers: {
+                default: []
             }
         },
 
         watch: {
-            state: {
-                handler(state, oldState) {
+            layers: {
+                handler(layers) {
                     this.$nextTick(() => {
                         if (! this.engine) {
                             this.init();
                         }
 
-                        if (state) {
-                            this.engine.resources(this.resources).init(state);
-
-                            if (!oldState) {
-                                this.engine.center();
-
-                                this.engine.run();
-                            }
-                        }
+                        this.engine.setLayers(layers);
                     });
                 },
                 deep: true,
@@ -63,39 +56,67 @@
         },
 
         mounted() {
-            window.spriteContext.keys().forEach((filename)=>{
-                this.resources.sprites.push(window.spriteContext(filename));
-            });
+
         },
 
         methods: {
             init() {
                 this.engine = new Game(this.$refs.gameContainer, {
-                    cellSize: 30
+                    cellSize: 32
                 });
 
-                this.engine.onClick((x, y, cellX, cellY) => {
-                    console.log('Click', cellX, cellY);
-                });
+                this.loadResources();
+
+                this.initEngineListeners();
 
                 this.initKeyListeners();
+
+                this.engine.run();
+            },
+
+            loadResources() {
+                window.spriteContext.keys().forEach((filename) => {
+                    let sprite = new Sprite();
+
+                    sprite.src = window.spriteContext(filename);
+
+                    this.resources.sprites.push(sprite);
+                });
+
+                this.engine.resources(this.resources);
+            },
+
+            initEngineListeners() {
+                this.engine.onLoadingStateUpdate((loadingState) => {
+                    this.$emit('loading-state', loadingState);
+                });
+
+                this.engine.onLoaded((resources) => {
+                    this.$emit('loaded', resources);
+                });
+
+                this.engine.onClick((cellX, cellY) => {
+                    this.$emit('click', cellX, cellY);
+                });
             },
 
             initKeyListeners() {
                 window.addEventListener('keydown', (event) => {
+                    if ([37,38,39,40].indexOf(event.keyCode) > 1) event.preventDefault();
+
                     switch(event.keyCode) {
-                        case 37: return this.engine.startMoving('left');
-                        case 38: return this.engine.startMoving('up');
-                        case 39: return this.engine.startMoving('right');
-                        case 40: return this.engine.startMoving('down');
+                        case 37: this.engine.startMoving('left');
+                        case 38: this.engine.startMoving('up');
+                        case 39: this.engine.startMoving('right');
+                        case 40: this.engine.startMoving('down');
                     }
-                });
+                }, false);
 
                 window.addEventListener('keyup', (event) => {
                     switch(event.keyCode) {
                         case 37: case 38: case 39: case 40: this.engine.stopMoving();
                     }
-                });
+                }, false);
             }
         }
     }

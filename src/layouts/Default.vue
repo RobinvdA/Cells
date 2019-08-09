@@ -1,7 +1,7 @@
 <template>
 
     <v-app>
-        <v-toolbar app>
+        <v-app-bar app>
             <v-toolbar-title class="headline text-uppercase">
                 <span>
                     Cells
@@ -13,10 +13,10 @@
 
             <v-spacer></v-spacer>
 
-            <v-btn flat href="https://github.com/robinvda/cells" target="_blank">
+            <v-btn href="https://github.com/robinvda/cells" target="_blank" text>
                 Git
             </v-btn>
-        </v-toolbar>
+        </v-app-bar>
 
         <v-content>
 

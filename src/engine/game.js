@@ -1,5 +1,6 @@
 import Loop from './loop';
 import Renderer from './renderer';
+import Resources from './resources';
 
 export default class Game {
 
@@ -9,36 +10,31 @@ export default class Game {
         this._onClickCallback = (x, y) => {};
 
         this.container.addEventListener('click', (event) => {
-            let x = (event.pageX - container.offsetLeft) - this.offsetX;
-            let y = (event.pageY - container.offsetTop) - this.offsetY;
+            let rect = this.container.getBoundingClientRect();
+            let x = event.clientX - rect.left - this.offsetX;
+            let y = event.clientY - rect.top - this.offsetY;
 
             let cellX = Math.floor(x / this.cellSize);
             let cellY = Math.floor(y / this.cellSize);
 
-            this._onClickCallback(x, y, cellX, cellY);
+            this._onClickCallback(cellX, cellY, x, y);
         }, false);
 
         this.container.width = this.container.getBoundingClientRect().width;
-        this.container.height = this.container.getBoundingClientRect().height;
+        this.container.height = this.container.getBoundingClientRect().width;
 
         this.context = container.getContext('2d');
-
-        this.renderer = new Renderer(this);
 
         this.loop = new Loop();
         this.loop.onDraw(this.update.bind(this));
 
-        this.columns = [];
-
-        this._resources = {
-            sprites: [],
-            spritesLoaded: 0
-            //
-        };
+        this._resources = new Resources();
 
         this.cellSize = options.cellSize || 20;
         this.gridHeight = 0;
         this.gridHeight = 0;
+
+        this.layers = null;
 
         this.offsetX = 0;
         this.offsetY = 0;
@@ -48,32 +44,29 @@ export default class Game {
     }
 
     resources(resources) {
-        this._resources = _.merge(this._resources, resources);
+        this._resources.setSprites(resources.sprites);
 
-        this._resources.sprites = _.map(this._resources.sprites, (base64) => {
-            let image = new Image();
+        this._resources.load((loadingState) => {
+            this._onLoadingStateUpdateCallback(loadingState);
 
-            image.onload = () => {
-                this._resources.spritesLoaded++;
-
-                if (this._resources.spritesLoaded == this._resources.sprites.length) {
-                    console.log('Loaded!');
-                }
+            if (loadingState.total >= 100) {
+                this._onLoadedCallback(this._resources);
             }
-
-            image.src = base64;
-
-            return image;
         });
 
         return this;
     }
 
-    init(columns) {
-        this.columns = columns;
+    setLayers(layers) {
+        this.layers = layers;
 
-        this.gridHeight = this.columns.length * this.cellSize;
-        this.gridWidth = this.columns[0].length * this.cellSize;
+        if (! _.isEmpty(this.layers) && ! _.isEmpty(this.layers.all())) {
+
+            this.gridWidth = this.layers.width() * this.cellSize;
+            this.gridHeight = this.layers.height() * this.cellSize;
+
+            this.render();
+        }
 
         return this;
     }
@@ -108,14 +101,18 @@ export default class Game {
     }
 
     render() {
-        this.renderer.renderMap();
+        _.each(this.layers.all(), (layer) => {
+            layer.render(this._resources, this.cellSize);
+        });
 
         return this;
     }
 
-    run() {
-        this.render();
+    isRunning() {
+        return this.loop.running;
+    }
 
+    run() {
         this.loop.start();
     }
 
@@ -146,10 +143,22 @@ export default class Game {
 
         this.context.translate(this.offsetX, this.offsetY);
 
-        this.context.drawImage(this.renderer.map.container, 0, 0);
+        if (! this.layers) return;
+
+        _.each(this.layers.all(), (layer) => {
+            this.context.drawImage(layer.container(), 0, 0);
+        });
     }
 
     onClick(callback) {
         this._onClickCallback = callback;
+    }
+
+    onLoadingStateUpdate(callback) {
+        this._onLoadingStateUpdateCallback = callback;
+    }
+
+    onLoaded(callback) {
+        this._onLoadedCallback = callback;
     }
 }
