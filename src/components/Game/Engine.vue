@@ -76,6 +76,10 @@
 
             loadResources() {
                 window.spriteContext.keys().forEach((filename) => {
+
+                    // TODO Remove this
+                    if (this.resources.sprites.length >= 10) return false;
+
                     let sprite = new Sprite();
 
                     sprite.src = window.spriteContext(filename);
@@ -97,6 +101,10 @@
 
                 this.engine.onClick((cellX, cellY) => {
                     this.$emit('click', cellX, cellY);
+                });
+
+                this.engine.onCellHover((cellX, cellY) => {
+                    this.$emit('cell-hover', cellX, cellY);
                 });
             },
 

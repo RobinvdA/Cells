@@ -10,6 +10,7 @@
                         @loading-state="loadingStateUpdate"
                         @loaded="loaded"
                         @click="engineClick"
+                        @cell-hover="engineCellHover"
                         :layers="layers"
                     ></engine>
 
@@ -63,7 +64,7 @@
 
                                 <v-container grid-list-xs>
                                     <v-layout wrap>
-                                        <v-flex v-for="(sprite, index) in resources.sprites" :key="index" pa-0 pr-1 shrink>
+                                        <v-flex v-for="(sprite, index) in resources.sprites" :key="index" :class="selectedSpriteIndex == index ? 'primary elevation-1' : ''" pa-1 shrink>
                                             <img @click="spriteClicked(index)" :src="sprite.src" />
                                         </v-flex>
                                     </v-layout>
@@ -114,7 +115,13 @@
                 resources: null,
 
                 selectedLayerIndex: null,
-                selectedSpriteIndex: null
+                selectedSpriteIndex: null,
+
+                hoveringCell: {
+                    x: null,
+                    y: null
+                },
+                highlightLayer: null
             }
         },
 
@@ -123,10 +130,6 @@
         },
 
         methods: {
-            layerClicked(index) {
-                this.selectedLayerIndex = index;
-            },
-
             spriteClicked(index) {
                 this.selectedSpriteIndex = index;
             },
@@ -137,6 +140,10 @@
                 if (! this.selectedSprite) return;
 
                 this.selectedLayer.state[y].splice(x, 1, this.selectedSpriteIndex);
+            },
+
+            engineCellHover(x, y) {
+                this.setHover(x, y);
             },
 
             loadingStateUpdate(loadingState) {
@@ -158,6 +165,10 @@
                 structureLayer.state = this.makeState();
                 layers.add(structureLayer);
 
+                this.highlightLayer = new Layer('Highlight');
+                this.highlightLayer.state = this.makeState();
+                layers.add(this.highlightLayer);
+
                 this.layers = layers;
             },
 
@@ -173,6 +184,17 @@
                 }
 
                 return state;
+            },
+
+            setHover(x, y) {
+                if (this.hoveringCell.x !== null && this.hoveringCell.y !== null) {
+                    this.highlightLayer.state[this.hoveringCell.y].splice(this.hoveringCell.x, 1, null);
+                }
+
+                this.hoveringCell.x = x;
+                this.hoveringCell.y = y;
+
+                this.highlightLayer.state[this.hoveringCell.y].splice(this.hoveringCell.x, 1, 7);
             }
         }
 

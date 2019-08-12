@@ -25,7 +25,9 @@ export default class Renderer {
                 this._context.drawImage(
                     resources.sprites[cell].image,
                     y * cellSize,
-                    x * cellSize
+                    x * cellSize,
+                    cellSize,
+                    cellSize
                 );
 
             }

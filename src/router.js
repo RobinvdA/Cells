@@ -15,7 +15,7 @@ Vue.component('default-layout', DefaultLayout);
 import Register from './pages/Register';
 import Lobby from './pages/Lobby';
 import Game from './pages/Game';
-import Test from './pages/Test';
+import WorldBuilder from './pages/WorldBuilder';
 
 const router = new Router({
   mode: 'history',
@@ -41,9 +41,9 @@ const router = new Router({
       },
 
       {
-          path: '/test',
-          name: 'test',
-          component: Test,
+          path: '/world-builder',
+          name: 'world-builder',
+          component: WorldBuilder,
           meta: { layout: 'default', auth: false }
       }
   ]

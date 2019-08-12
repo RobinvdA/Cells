@@ -7,12 +7,13 @@ export default class Game {
     constructor(container, options = {}) {
         this.container = container;
 
-        this._onClickCallback = (x, y) => {};
+        this._onClickCallback = () => {};
+        this._onCellHoverCallback = () => {};
+        this._hoveringCell = {x: null, y: null};
 
         this.container.addEventListener('click', (event) => {
-            let rect = this.container.getBoundingClientRect();
-            let x = event.clientX - rect.left - this.offsetX;
-            let y = event.clientY - rect.top - this.offsetY;
+            let x = event.clientX - this._boundingClientRect.left - this.offsetX;
+            let y = event.clientY - this._boundingClientRect.top - this.offsetY;
 
             let cellX = Math.floor(x / this.cellSize);
             let cellY = Math.floor(y / this.cellSize);
@@ -20,8 +21,25 @@ export default class Game {
             this._onClickCallback(cellX, cellY, x, y);
         }, false);
 
-        this.container.width = this.container.getBoundingClientRect().width;
-        this.container.height = this.container.getBoundingClientRect().width;
+        this.container.addEventListener('mousemove', (event) => {
+            let x = event.clientX - this._boundingClientRect.left - this.offsetX;
+            let y = event.clientY - this._boundingClientRect.top - this.offsetY;
+
+            let cellX = Math.floor(x / this.cellSize);
+            let cellY = Math.floor(y / this.cellSize);
+
+            if (this._hoveringCell.x != cellX || this._hoveringCell.y != cellY) {
+                this._hoveringCell.x = cellX;
+                this._hoveringCell.y = cellY;
+
+                this._onCellHoverCallback(cellX, cellY);
+            }
+        });
+
+        this._boundingClientRect = this.container.getBoundingClientRect();
+
+        this.container.width = this._boundingClientRect.width;
+        this.container.height = this._boundingClientRect.width;
 
         this.context = container.getContext('2d');
 
@@ -61,7 +79,6 @@ export default class Game {
         this.layers = layers;
 
         if (! _.isEmpty(this.layers) && ! _.isEmpty(this.layers.all())) {
-
             this.gridWidth = this.layers.width() * this.cellSize;
             this.gridHeight = this.layers.height() * this.cellSize;
 
@@ -152,6 +169,10 @@ export default class Game {
 
     onClick(callback) {
         this._onClickCallback = callback;
+    }
+
+    onCellHover(callback) {
+        this._onCellHoverCallback = callback;
     }
 
     onLoadingStateUpdate(callback) {
